@@ -1,0 +1,56 @@
+SET NOCOUNT ON;
+
+IF OBJECT_ID('CLIENTE') is not null drop table CLIENTE
+
+DECLARE
+
+@startDate smalldatetime, @endDate smalldatetime, @i int;
+
+ SELECT @i = 1,
+
+ @startDate = 'Jan 01, 2007',
+
+ @endDate = DATEADD(yy, 40, @startDate);
+
+  IF EXISTS(SELECT * FROM sysobjects
+
+  WHERE ID = (OBJECT_ID('dbo.sequence')) AND xtype = 'U')
+
+  DROP TABLE dbo.sequence;
+
+  CREATE TABLE dbo.sequence(num int NOT NULL);
+
+   WHILE(@i <= (SELECT DATEDIFF(dd, @startDate, @endDate)))
+
+    BEGIN
+
+    INSERT INTO dbo.sequence VALUES(@i);
+
+    SET @i = @i + 1;
+
+   END
+
+DECLARE
+
+@iniDate smalldatetime;
+
+  SELECT @iniDate = 'Dec 31, 2001';
+
+   SELECT NEWID() AS ID_CLIENTE, CONVERT(VARCHAR,DATEADD(dd, num, @iniDate),103) as Dt
+		INTO CLIENTE
+   FROM sequence
+   UNION ALL
+   SELECT TOP 50 PERCENT NEWID(),CONVERT(VARCHAR,DATEADD(dd, num, @iniDate),103)  Dt
+   FROM sequence
+ GO
+ 
+   INSERT INTO CLIENTE
+   SELECT TOP 25 PERCENT
+   NEWID(),
+   Dt
+   FROM CLIENTE
+   ORDER BY NEWID() 
+   GO 20
+
+
+   
